@@ -1,0 +1,28 @@
+# ------------------------------------
+# Multiboot layout (system + recovery)
+# ------------------------------------
+
+# Configuration
+bootloader ${WIC_BOOTLOADER_CONFIG}
+
+# Optional: embed MLO at offset 0
+part --ondisk ${WIC_DEVICE} --source rawcopy --sourceparams="file=MLO" --no-table --align 4
+
+# Bootloader Integration
+# The target implementation must provide specific artifacts and fstypes
+part /boot --ondisk ${WIC_DEVICE} --source rootfs --rootfs-dir ${DEPLOY_DIR_IMAGE}/bootloader_rootfs --label bootloader --fstype=vfat --fixed-size ${WIC_BOOTLOADER_PART_SIZE} --active --align 4 --offset 256
+
+# Mainteanance mode 1
+part --ondisk ${WIC_DEVICE} ${WIC_KERNELIMG_SOURCE} --fstype=vfat --fixed-size ${WIC_KERNELIMG_PART_SIZE} ${WIC_FIRST_PARTITION_OFFSET} --label boot_maint1
+part --ondisk ${WIC_DEVICE} ${WIC_MAINTENANCE_ROOTFS_SOURCE} --fstype=squashfs --fixed-size ${WIC_MAINTENANCE_ROOTFS_PART_SIZE}
+
+# Mainteanance mode 2
+part --ondisk ${WIC_DEVICE} ${WIC_KERNELIMG_SOURCE} --fstype=vfat --fixed-size ${WIC_KERNELIMG_PART_SIZE} ${WIC_FIRST_PARTITION_OFFSET} --label boot_maint2
+part --ondisk ${WIC_DEVICE} ${WIC_MAINTENANCE_ROOTFS_SOURCE} --fstype=squashfs --fixed-size ${WIC_MAINTENANCE_ROOTFS_PART_SIZE}
+
+# Normal mode
+part --ondisk ${WIC_DEVICE} ${WIC_KERNELIMG_SOURCE} --fstype=vfat --fixed-size ${WIC_KERNELIMG_PART_SIZE} --label boot_normal
+part --ondisk ${WIC_DEVICE} ${WIC_NORMAL_ROOTFS_SOURCE} --fstype=ext4 --fixed-size ${WIC_NORMAL_ROOTFS_PART_SIZE} --label rootfs_normal
+
+# Persistent data partition (automatically expanding to fill the rest of the disk)
+part --ondisk ${WIC_DEVICE} --fstype=ext4 --size ${WIC_PERSISTENT_MIN_PART_SIZE} --fsoptions "x-systemd.growfs" --label persistent
