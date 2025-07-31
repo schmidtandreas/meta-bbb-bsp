@@ -6,11 +6,11 @@
 bootloader ${WIC_BOOTLOADER_CONFIG}
 
 # Optional: embed MLO at offset 0
-part --ondisk ${WIC_DEVICE} --source rawcopy --sourceparams="file=MLO" --no-table --align 4
+part --ondisk ${WIC_DEVICE} --source rawcopy --sourceparams="file=MLO" --offset 256 --align 4
 
 # Bootloader Integration
 # The target implementation must provide specific artifacts and fstypes
-part /boot --ondisk ${WIC_DEVICE} --source rootfs --rootfs-dir ${DEPLOY_DIR_IMAGE}/bootloader_rootfs --label bootloader --fstype=vfat --fixed-size ${WIC_BOOTLOADER_PART_SIZE} --active --align 4 --offset 256
+part /boot --ondisk ${WIC_DEVICE} --source rootfs --rootfs-dir ${DEPLOY_DIR_IMAGE}/bootloader_rootfs --label bootloader --fstype=vfat --fixed-size ${WIC_BOOTLOADER_PART_SIZE} --active --align 4 --offset 512
 
 # Mainteanance mode 1
 part --ondisk ${WIC_DEVICE} ${WIC_KERNELIMG_SOURCE} --fstype=vfat --fixed-size ${WIC_KERNELIMG_PART_SIZE} ${WIC_FIRST_PARTITION_OFFSET} --label boot_maint1
